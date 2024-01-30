@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# redacted for git
+#SBATCH --account=
+#SBATCH --output=
+#SBATCH --error=
+
+# my defaults
+#SBATCH --partition=gpu
+#SBATCH --job-name=cifarmodel
+#SBATCH --mem=10000M
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --time=0-12:00:00
+#SBATCH --nodes=1
+#SBATCH --gpus=1
+
+# path to dir containing model_definition.py
+MODEL_DIR=
+ 
+date
+# add commands for setting up python environment and packages here
+python3 --version
+python3 -u /home/apeter22/mlexp/run_cifar_model.py $MODEL_DIR $SLURM_JOB_GPUS
+date
