@@ -40,6 +40,7 @@ print("""
 GPU Selection
 -------------
 """)
+"""
 # store user's desired GPU, if specified
 desired_gpu_ordinal = None
 if len(sys.argv) <= 2:
@@ -50,22 +51,26 @@ else:
         print(f"Specified desired GPU ordinal {desired_gpu_ordinal}")
     except ValueError:
         print(f"Invalid desired GPU ordinal {sys.argv[1]} provided")
+"""
 
 # printoutput information about available GPUs
 if torch.cuda.is_available():
     gpu_count = torch.cuda.device_count()
     # show information for each GPU
     print(f"Found {gpu_count} GPU devices. Showing info:")
-    for i in range(torch.cuda.device_count()):
+    for i in range(gpu_count):
         print(f"GPU {i}:")
         print(torch.cuda.get_device_properties(i))
+    """
     # use desired GPU if available
     if desired_gpu_ordinal and 0 <= desired_gpu_ordinal < torch.cuda.device_count():
         device = f"cuda:{desired_gpu_ordinal}"
     else:
         print(f"No GPU found with desired GPU ordinal")
         device = "cuda"
+    """
     print(f"CUDA Current Device: {torch.cuda.current_device()}")
+    device = "cuda"
 elif torch.backends.mps.is_available():
     print("CUDA is not available. Using MPS")
     device = "mps"
@@ -83,7 +88,13 @@ Model Definition and Training Parameters
 """)
 
 print(f"Using model and training parameters from {model_dir}/model_definition.py")
-MODEL = model_definition.MODEL.to(device)
+
+# use available GPUs:
+if device == "cuda":
+    MODEL = nn.DataParallel(model_definition.MODEL).to(device)
+else:
+    MODEL = model_definition.MODEL.to(device)
+
 print(f"Model: {str(MODEL)}")
 
 # set training parameters
@@ -109,21 +120,24 @@ Training Data
 -------------
 """)
 
+TRANSFORM = model_definition.TRANSFORM
+
 # download and define the testing and training data
 training_dataset = datasets.CIFAR10(
     root="data",
     train=True,
     download=True,
-    transform=transforms.ToTensor()
+    transform=TRANSFORM
 )
 testing_dataset = datasets.CIFAR10(
     root="data",
     train=False,
     download=True,
-    transform=transforms.ToTensor()
+    transform=TRANSFORM
 )
 
 print("Training data found/downloaded")
+print(f"Tensors are of dimensions {training_dataset[0][0].size()}")
 
 # wrap in dataloaders to feed model in batches
 training_dataloader = DataLoader(training_dataset, batch_size=BATCH_SIZE)

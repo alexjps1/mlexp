@@ -1,25 +1,25 @@
 #!/bin/bash
 
-# redacted for git
-#SBATCH --account=
-#SBATCH --output=
-#SBATCH --error=
-
-# my defaults
 #SBATCH --partition=gpu
 #SBATCH --job-name=cifarmodel
 #SBATCH --mem=10000M
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
-#SBATCH --time=0-12:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --nodes=1
-#SBATCH --gpus=1
+#SBATCH --gpus=2
+#SBATCH --account=
+#SBATCH --output=
+#SBATCH --error=
 
-# path to dir containing model_definition.py
+# model definition directory (contains model_definition.py)
 MODEL_DIR=
  
+echo "Running with model dir $MODEL_DIR and gpus $SLURM_JOB_GPUS"
 date
-# add commands for setting up python environment and packages here
+module load python3/3.10.13
+conda activate pytorch-2.1.2-20240109 
 python3 --version
-python3 -u /home/apeter22/mlexp/run_cifar_model.py $MODEL_DIR $SLURM_JOB_GPUS
+# use full path to run_cifar_model.py
+python3 -u run_cifar_model.py $MODEL_DIR $SLURM_JOB_GPUS
 date
